@@ -15,9 +15,9 @@ Toma los estados de cuenta bancarios y los prepara para la contabilidad y la cob
 
 La clasificación de rangos y el tipo de cada movimiento están en `ClasificacionBancos.cs`. Las pólizas se generan en `ProcesoPoliza*.cs`.
 
-## Instalar (versión 4.2.0.104)
+## Instalar (versión 4.2.0.105)
 
-1. Recibe el archivo `CDC_Macro PTC 104.zip`.
+1. Recibe el archivo `CDC_Macro PTC 105.zip`.
 2. Haz clic derecho sobre el zip y elige **Extraer todo**. Pon como destino una carpeta fácil de encontrar, por ejemplo `C:\CDC_Macro PTC`.
 3. Entra a la carpeta extraída y haz doble clic en **setup.exe**.
 4. Sigue el asistente de instalación. Si Windows muestra una advertencia de seguridad, revisa que el archivo venga de la fuente correcta y acepta solo si es así.
@@ -44,8 +44,12 @@ La clasificación de rangos y el tipo de cada movimiento están en `Clasificacio
 
 ## Compilar desde el código
 
+1. Clona el repo: `https://github.com/kgamboa/MacroCDC.git`.
+2. Copia `Clases\CuentasBancos.json` dentro de `Bancos\CategoriaBancos\Clases\`. No está en GitHub porque tiene cuentas bancarias reales.
+3. Abre `CirculoCredito.sln` en Visual Studio y compila, o usa MSBuild:
+
 ```powershell
-& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' 'C:\Users\karlo\source\repos\cdc\Bancos\CategoriaBancos\Macro.csproj' /t:Build /p:Configuration=Debug /nologo
+& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' 'C:\Users\karlo\source\repos\MacroCDC\CirculoCredito.sln' /t:Build /p:Configuration=Debug /nologo
 ```
 
 El ejecutable queda en `Bancos\CategoriaBancos\bin\Debug\MacroCDC_PTC.exe`.

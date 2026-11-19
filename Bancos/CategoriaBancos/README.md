@@ -35,6 +35,13 @@ La clasificación de rangos y el tipo de cada movimiento están en `Clasificacio
 - Si el instalador no abre, vuelve a extraer el zip completo antes de ejecutar `setup.exe`.
 - Si pide actualizar, acepta la actualización.
 
+## Despliegue en cliente
+
+- **Instalación en la PC de Maricela (cliente):** se instaló como administrador de la máquina, desde una carpeta compartida en `Z:` (ClickOnce), y quedó en `C:`.
+- **Versión instalada:** 4.2.0.105 (revisión ClickOnce), ensamblado 2.7.2.11. Pendiente confirmar en el equipo del cliente.
+- **Actualizaciones:** ClickOnce busca la nueva versión en la ruta de `Z:` desde la que se instaló. Si `Z:` no está conectada, la app no se actualiza.
+- **Error al crear acceso directo:** `Acceso denegado` en el escritorio de la cuenta del cliente. No afecta la app instalada.
+
 ## Compilar desde el código
 
 ```powershell

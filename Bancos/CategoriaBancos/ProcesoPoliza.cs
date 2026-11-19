@@ -51,6 +51,7 @@ namespace TesoreriaCobranza
             Utils.EventLog.LogMessage("ProcesoPoliza : " + Path.GetFileNameWithoutExtension(FileName));
 
             this.wait = wait;
+            this.wait.Title = "Procesando " + ErrorServices.singleton.Proceso + " - " + Path.GetFileNameWithoutExtension(FileName);
             this.CancellationToken = wait.CancellationToken.Token;
         }
 
@@ -58,6 +59,8 @@ namespace TesoreriaCobranza
 
         public new void EjecutaProceso()
         {
+            // El titulo se asigna aqui: antes de mostrar la ventana (constructor) PleaseWait lo descarta.
+            this.wait.Title = "Procesando " + ErrorServices.singleton.Proceso + " - " + Path.GetFileNameWithoutExtension(FileName);
             Dictionary<string, Dictionary<String, Poliza>> polizas = ObtienePolizas();
             var firstDate = dates.FirstOrDefault().Value.FirstOrDefault();
             var path = this.DirInfo + @"\" + firstDate.ToString("MMMM") + firstDate.ToString("yy");
@@ -321,12 +324,18 @@ namespace TesoreriaCobranza
                             continue;
                         }
 
-                        for (int r = 1; r <= range.Rows.Count; r++)
+                        // UsedRange puede cubrir la hoja completa (1,048,576 filas); el corte es por 100 filas vacias seguidas.
+                        int totalRows = range.Rows.Count;
+                        Utils.EventLog.LogMessage("Filas en rango: " + totalRows + " en hoja " + sheet);
+                        for (int r = 1; r <= totalRows; r++)
                         {
                             // Verificamos si se solicitó la cancelación
                             CancellationToken.ThrowIfCancellationRequested();
 
-                            var progress = (r / (decimal)range.Rows.Count) * 100;
+                            if (r % 500 == 1)
+                                Utils.EventLog.LogMessage("Fila " + r + " de " + totalRows + " en hoja " + sheet);
+
+                            var progress = (r / (decimal)totalRows) * 100;
                             if (bancoKey.StartsWith("BBVA"))
                                 this.wait.ProgressValue = 100 - progress;
                             else
@@ -336,9 +345,16 @@ namespace TesoreriaCobranza
                             dynamic content = TipoMov(tipoMov.Value);
 
 
-                            // Corta solo tras 100 filas vacías seguidas (fin de datos).
-                            // Las filas sin clasificar en medio de la hoja se saltan, no detienen el recorrido.
-                            if (content == null || string.IsNullOrWhiteSpace(content.ToString()))
+                            // Corta tras 100 filas sin movimiento seguidas (fin de datos).
+                            // Una fila vacia = sin tipo, o SinReconocer sin fecha. Las SinReconocer con fecha
+                            // (movimientos sin clasificar en medio de la hoja) no cuentan y se saltan.
+                            bool sinMovimiento = content == null || string.IsNullOrWhiteSpace(content.ToString());
+                            if (!sinMovimiento && content == TipoMovimiento.SinReconocer && FechaColumn.ContainsKey(bancoKey))
+                            {
+                                dynamic celdaFecha = range.Cells[r, FechaColumn[bancoKey]];
+                                sinMovimiento = string.IsNullOrWhiteSpace(celdaFecha.value?.ToString());
+                            }
+                            if (sinMovimiento)
                             {
                                 count++;
                                 if (count >= 100)
